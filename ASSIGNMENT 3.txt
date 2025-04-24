@@ -1,0 +1,81 @@
+Tables:
+
+mysql> select * from Students_012;
++-----------+-----------+----------+------------------------+------------+----------+
+| StudentID | FirstName | LastName | Email              	| DOB    	| CourseID |
++-----------+-----------+----------+------------------------+------------+----------+
+|     	1 | John  	| Doe  	| john.doe@example.com   | 2001-05-12 |    	1 |
+|     	2 | Jane  	| Smith	| jane.smith@example.com | 1999-08-25 |    	2 |
+|     	3 | Mark  	| Lee  	| mark.lee@example.com   | 2002-02-18 |    	3 |
++-----------+-----------+----------+------------------------+------------+----------+
+
+
+mysql> select * from Courses_012;
++----------+------------------+---------+
+| CourseID | CourseName   	| Credits |
++----------+------------------+---------+
+|    	1 | Computer Science |   	4 |
+|    	2 | Mathematics  	|   	4 |
+|    	3 | Physics      	|   	3 |
++----------+------------------+---------+
+
+Test 1: Insert a NULL value into a NOT NULL column.
+mysql> INSERT INTO Students (StudentID, FirstName, LastName, Email, DOB, CourseID)
+	-> VALUES (4, NULL, 'Brown', 'test.brown@example.com', '2003-06-30', 1);
+Output: 
+ERROR 1048 (23000): Column 'FirstName' cannot be null
+
+Test 2: Insert a duplicate value in the UNIQUE column.
+mysql> INSERT INTO Students (StudentID, FirstName, LastName, Email, DOB, CourseID)
+	-> VALUES (4, 'Emma', 'Brown', 'john.doe@example.com', '2003-06-30', 2);
+output:
+ERROR 1062 (23000): Duplicate entry 'john.doe@example.com' for key 'Students.Email'
+
+
+Test 3: Insert a record with an invalid FOREIGN KEY reference.
+mysql> INSERT INTO Students (StudentID, FirstName, LastName, Email, DOB, CourseID)
+	-> VALUES (4, 'Emma', 'Brown', 'emma.brown@example.com', '2003-06-30', 99);
+output:
+ERROR 1452 (23000): Cannot add or update a child row: a foreign key constraint fails (`StudentManagement`.`Students`, CONSTRAINT `Students_ibfk_1` FOREIGN KEY (`CourseID`) REFERENCES `Courses` (`CourseID`))
+
+1]Write a query to display the names of students who were born after the year 2000.
+mysql> SELECT FirstName, LastName FROM Students WHERE DOB > '2000-12-31';
+
+output:
++-----------+----------+
+| FirstName | LastName |
++-----------+----------+
+| John  	| Doe  	|
+| Mark  	| Lee  	|
++-----------+----------+
+
+2] Write a query to update the course credits for "Computer Science" to 4.
+mysql> UPDATE Courses SET Credits = 4 WHERE CourseName = 'Computer Science';
+
+3] Write a query to delete a student record whose email is 'test@example.com'.
+mysql> DELETE FROM Students WHERE Email = 'test@example.com';
+
+4] Write a query to find students who are not enrolled in any course.
+mysql> SELECT FirstName, LastName FROM Students WHERE CourseID IS NULL;
+
+Output:
+Empty set 
+
+
+
+
+
+5] Test the UNIQUE constraint by inserting a duplicate email into the Students table.
+mysql> INSERT INTO Students (StudentID, FirstName, LastName, Email, DOB, CourseID)
+	-> VALUES (4, 'Emma', 'Brown', 'john.doe@example.com', '2003-06-30', 2);
+
+Output:
+ERROR 1062 (23000): Duplicate entry 'john.doe@example.com' for key 'Students.Email'
+
+6] Test the FOREIGN KEY constraint by inserting a student with a CourseID that does not exist in the Courses table
+mysql> INSERT INTO Students (StudentID, FirstName, LastName, Email, DOB, CourseID)
+	-> VALUES (5, 'Oliver', 'Green', 'oliver.green@example.com', '2001-10-15', 10);
+
+Output:
+ERROR 1452 (23000): Cannot add or update a child row: a foreign key constraint fails (`StudentManagement`.`Students`, CONSTRAINT `Students_ibfk_1` FOREIGN KEY (`CourseID`) REFERENCES `Courses` (`CourseID`))
+

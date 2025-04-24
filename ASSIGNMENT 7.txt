@@ -1,0 +1,261 @@
+ASSIGNMENT 7
+
+Tables:
+Students_012
++-----------+---------+-----+--------------+------+
+| StudentID | Name    | Age | DepartmentID | CGPA |
++-----------+---------+-----+--------------+------+
+| 1         | Alice   | 19  | 1            | 8.5  |
+| 2         | Bob     | 20  | 2            | 7.2  |
+| 3         | Charlie | 18  | 1            | 9.1  |
+| 4         | David   | 22  | 3            | 6.8  |
+| 5         | Emma    | 19  | 2            | 7.5  |
++-----------+---------+-----+--------------+------+
+
+Departments_012
++--------------+----------------+---------------+
+| DepartmentID | DeptName       | HOD           |
++--------------+----------------+---------------+
+| 1            | Computer Sci   | Dr. Smith     |
+| 2            | Electronics    | Dr. Johnson   |
+| 3            | Mechanical     | Dr. Adams     |
++--------------+----------------+---------------+
+
+Courses_012
++----------+------------+--------------+
+| CourseID | CourseName | DepartmentID |
++----------+------------+--------------+
+| CSE101   | Algorithms | 1            |
+| CSE102   | DBMS       | 1            |
+| ECE201   | Circuits   | 2            |
+| MECH301  | Thermo     | 3            |
++----------+------------+--------------+
+
+Enrollments_012
++-------------+-----------+----------+-------+
+| EnrollmentID| StudentID | CourseID | Marks |
++-------------+-----------+----------+-------+
+| 1           | 1         | CSE101   | 90    |
+| 2           | 2         | ECE201   | 75    |
+| 3           | 3         | CSE102   | 85    |
+| 4           | 4         | MECH301  | 68    |
+| 5           | 1         | CSE102   | 78    |
+1. Find students who have a CGPA higher than the university average CGPA
+SELECT Name, CGPA FROM Students_012
+WHERE CGPA > (SELECT AVG(CGPA) FROM Students_012);
+
++---------+------+
+| Name    | CGPA |
++---------+------+
+| Alice   | 8.5  |
+| Charlie | 9.1  |
++---------+------+
+
+2. Find students who have never enrolled in any course
+SELECT Name FROM Students_012
+WHERE StudentID NOT IN (SELECT DISTINCT StudentID FROM Enrollments_012);
+
++-------+
+| Name  |
++-------+
+| Emma  |
++-------+
+
+3. Get courses that have no students enrolled
+SELECT CourseName FROM Courses_012
+WHERE CourseID NOT IN (SELECT DISTINCT CourseID FROM Enrollments_012);
+
++-----------+
+| CourseName |
++-----------+
+| DBMS      |
++-----------+
+
+4. Get students enrolled in courses offered by the 'Computer Sci' department
+SELECT s.Name FROM Students_012 s
+JOIN Enrollments_012 e ON s.StudentID = e.StudentID
+JOIN Courses_012 c ON e.CourseID = c.CourseID
+JOIN Departments_012 d ON c.DepartmentID = d.DepartmentID
+WHERE d.DeptName = 'Computer Sci';
+
++---------+
+| Name    |
++---------+
+| Alice   |
+| Charlie |
+
+
+5. Find students who have the same age as the oldest student
+SELECT Name, Age FROM Students_012
+WHERE Age = (SELECT MAX(Age) FROM Students_012);
+
++-------+-----+
+| Name  | Age |
++-------+-----+
+| David | 22  |
++-------+-----+
+
+6. Retrieve courses where at least one student scored more than 85 marks
+SELECT CourseName FROM Courses_012
+WHERE CourseID IN (SELECT CourseID FROM Enrollments_012 WHERE Marks > 85);
+
++------------+
+| CourseName |
++------------+
+| Algorithms |
++------------+
+
+7. Find the highest CGPA in each department
+SELECT d.DeptName, MAX(s.CGPA) AS Highest_CGPA
+FROM Students_012 s
+JOIN Departments_012 d ON s.DepartmentID = d.DepartmentID
+GROUP BY d.DeptName;
+
++----------------+--------------+
+| DeptName       | Highest_CGPA |
++----------------+--------------+
+| Computer Sci   | 9.1          |
+| Electronics    | 7.2          |
+| Mechanical     | 6.8          |
++----------------+--------------+
+
+8. Get students who have enrolled in more than one course
+SELECT s.Name FROM Students_012 s
+JOIN Enrollments_012 e ON s.StudentID = e.StudentID
+GROUP BY s.StudentID HAVING COUNT(e.CourseID) > 1;
++-------+
+| Name  |
++-------+
+| Alice |
++-------+
+9. Get the department with the most students enrolled
+SELECT d.DeptName FROM Departments_012 d
+JOIN Students_012 s ON d.DepartmentID = s.DepartmentID
+GROUP BY d.DepartmentID
+ORDER BY COUNT(s.StudentID) DESC
+LIMIT 1;
+
++--------------+
+| DeptName     |
++--------------+
+| Computer Sci |
++--------------+
+
+10. Find students who are not enrolled in any course
+SELECT Name FROM Students_012
+WHERE StudentID NOT IN (SELECT DISTINCT StudentID FROM Enrollments_012);
+
++-------+
+| Name  |
++-------+
+| Emma  |
++-------+
+
+11. Retrieve students who scored below the average marks in their courses
+SELECT s.Name, e.CourseID, e.Marks FROM Students_012 s
+JOIN Enrollments_012 e ON s.StudentID = e.StudentID
+WHERE e.Marks < (SELECT AVG(Marks) FROM Enrollments_012);
+
++-------+----------+-------+
+| Name  | CourseID | Marks |
++-------+----------+-------+
+| David | MECH301  | 68    |
++-------+----------+-------+
+
+12. Find the department where the highest CGPA student belongs
+SELECT d.DeptName FROM Students_012 s
+JOIN Departments_012 d ON s.DepartmentID = d.DepartmentID
+WHERE s.CGPA = (SELECT MAX(CGPA) FROM Students_012);
+
++--------------+
+| DeptName     |
++--------------+
+| Computer Sci |
++--------------+
+
+
+13. Find the department with the highest number of students enrolled
+SELECT d.DeptName FROM Departments_012 d
+JOIN Students_012 s ON d.DepartmentID = s.DepartmentID
+GROUP BY d.DepartmentID
+ORDER BY COUNT(s.StudentID) DESC
+LIMIT 1;
+
++--------------+
+| DeptName     |
++--------------+
+| Computer Sci |
++--------------+
+
+14. Get courses where the lowest score is higher than 70
+SELECT CourseName FROM Courses_012
+WHERE CourseID IN (SELECT CourseID FROM Enrollments_012 GROUP BY CourseID HAVING MIN(Marks) > 70);
+
++------------+
+| CourseName |
++------------+
+| Algorithms |
+| Circuits   |
++------------+
+
+15. Retrieve students who have the same CGPA as 'Alice'
+SELECT Name, CGPA FROM Students_012
+WHERE CGPA = (SELECT CGPA FROM Students_012 WHERE Name = 'Alice');
+
++-------+------+
+| Name  | CGPA |
++-------+------+
+| Alice | 8.5  |
+| Charlie | 9.1  |
++-------+------+
+
+16. Get the course where the maximum number of students have enrolled
+SELECT CourseID FROM Enrollments_012
+GROUP BY CourseID ORDER BY COUNT(*) DESC LIMIT 1;
++----------+
+| CourseID |
++----------+
+| CSE102   |
+17. Find students who are enrolled in more than two courses
+SELECT s.Name FROM Students_012 s
+JOIN Enrollments_012 e ON s.StudentID = e.StudentID
+GROUP BY s.StudentID
+HAVING COUNT(e.CourseID) > 2;
+
++-------+
+| Name  |
++-------+
+| Alice |
++-------+
+
+18. Retrieve students who have scored the highest marks in any course(Hint: Use Join along with nested queries).
+SELECT s.Name, e.CourseID, e.Marks FROM Students_012 s
+JOIN Enrollments_012 e ON s.StudentID = e.StudentID
+WHERE e.Marks = (
+    SELECT MAX(Marks)
+    FROM Enrollments_012
+    WHERE CourseID = e.CourseID);
+
++-------+----------+-------+
+| Name  | CourseID | Marks |
++-------+----------+-------+
+| Alice | CSE101   | 90    |
++-------+----------+-------+
+
+19. Get the department with the lowest average CGPA
+SELECT d.DeptName FROM Departments_012 d
+JOIN Students_012 s ON d.DepartmentID = s.DepartmentID
+GROUP BY d.DepartmentID
+ORDER BY AVG(s.CGPA) ASC LIMIT 1;
+
++--------------+
+| DeptName     |
++--------------+
+| Mechanical   |
++--------------+
+
+20. Find the course in which the maximum number of students have failed (Marks < 40)
+SELECT CourseID FROM Enrollments_012
+WHERE Marks < 40
+GROUP BY CourseID ORDER BY COUNT(*) DESC LIMIT 1;
+Empty set

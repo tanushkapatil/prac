@@ -1,0 +1,337 @@
+ASSIGNMENT 6
+
+Tables:
+customers_012
++------------+---------+------------------+-------------+
+| customer_id | name    | email            | city        |
++------------+---------+------------------+-------------+
+| 1          | Alice   | alice@mail.com   | New York    |
+| 2          | Bob     | bob@mail.com     | Los Angeles |
+| 3          | Charlie | charlie@mail.com | Chicago     |
++------------+---------+------------------+-------------+
+
+Orders_012
++---------+------------+------------+--------------+
+| order_id | customer_id | order_date | total_amount |
++---------+------------+------------+--------------+
+| 101     | 1          | 2024-03-01 | 250.00       |
+| 102     | 2          | 2024-03-10 | 400.00       |
++---------+------------+------------+--------------+
+
+Products_012
++------------+--------------+-------------+-------+
+| product_id | product_name | category    | price |
++------------+--------------+-------------+-------+
+| 201        | Laptop       | Electronics | 800.00 |
+| 202        | Phone        | Electronics | 500.00 |
+| 203        | Chair        | Furniture   | 150.00 |
++------------+--------------+-------------+-------+
+
+Order_Items_012
++--------------+---------+------------+----------+----------+
+| order_item_id | order_id | product_id | quantity | subtotal |
++--------------+---------+------------+----------+----------+
+| 301          | 101     | 201        | 1        | 800.00   |
+| 302          | 101     | 202        | 2        | 1000.00  |
+| 303          | 102     | 203        | 1        | 150.00   |
++--------------+---------+------------+----------+----------+
+
+Sellers_012
++-----------+--------------+-------------+
+| seller_id | seller_name  | city        |
++-----------+--------------+-------------+
+| 401       | John Store   | New York    |
+| 402       | Best Buy     | Los Angeles |
+| 403       | Home Goods   | Chicago     |
++-----------+--------------+-------------+
+
+
+1. Retrieve all customers along with their corresponding orders (including customers who haven't ordered).
+SELECT c.customer_id, c.name, o.order_id, o.order_date, o.total_amount
+FROM Customers_012 c
+LEFT JOIN Orders_012 o ON c.customer_id = o.customer_id;
+
++------------+---------+---------+------------+--------------+
+| customer_id | name    | order_id | order_date | total_amount |
++------------+---------+---------+------------+--------------+
+| 1          | Alice   | 101     | 2024-03-01 | 250.00       |
+| 2          | Bob     | 102     | 2024-03-10 | 400.00       |
+| 3          | Charlie | NULL    | NULL       | NULL         |
++------------+---------+---------+------------+--------------+
+
+2. List all orders along with the product names and their quantities.
+SELECT oi.order_id, p.product_name, oi.quantity
+FROM Order_Items_012 oi
+JOIN Products_012 p ON oi.product_id = p.product_id;
+
++---------+--------------+----------+
+| order_id | product_name | quantity |
++---------+--------------+----------+
+| 101     | Laptop       | 1        |
+| 101     | Phone        | 2        |
+| 102     | Chair        | 1        |
++---------+--------------+----------+
+
+
+3. Find the total number of orders placed by each customer.
+SELECT c.customer_id, c.name, COUNT(o.order_id) AS total_orders
+FROM Customers_012 c
+LEFT JOIN Orders_012 o ON c.customer_id = o.customer_id
+GROUP BY c.customer_id;
+
++------------+---------+--------------+
+| customer_id | name    | total_orders |
++------------+---------+--------------+
+| 1          | Alice   | 1            |
+| 2          | Bob     | 1            |
+| 3          | Charlie | 0            |
++------------+---------+--------------+
+
+
+4. Find the total number of products available in each category.
+SELECT category, COUNT(product_id) AS total_products
+FROM Products_012
+GROUP BY category;
+
++-------------+---------------+
+| category    | total_products |
++-------------+---------------+
+| Electronics | 2             |
+| Furniture   | 1             |
++-------------+---------------+
+
+5. Retrieve the order details, including customer name and total amount, for all orders placed in the last 30 days.
+SELECT o.order_id, c.name, o.total_amount
+FROM Orders_012 o
+JOIN Customers_012 c ON o.customer_id = c.customer_id
+WHERE o.order_date >= CURDATE() - INTERVAL 30 DAY;
+
++---------+---------+--------------+
+| order_id | name    | total_amount |
++---------+---------+--------------+
+| 101     | Alice   | 250.00       |
+| 102     | Bob     | 400.00       |
++---------+---------+--------------+
+
+6. Retrieve the names of sellers who sell a specific product (e.g., "Laptop").
+SELECT s.seller_name
+FROM Sellers_012 s
+JOIN Product_Sellers_012 ps ON s.seller_id = ps.seller_id
+JOIN Products_012 p ON ps.product_id = p.product_id
+WHERE p.product_name = 'Laptop';
+
++-------------+
+| seller_name |
++-------------+
+| John Store  |
++-------------+
+
+7. Show all customers who have never placed an order.
+SELECT c.customer_id, c.name
+FROM Customers_012 c
+LEFT JOIN Orders_012 o ON c.customer_id = o.customer_id
+WHERE o.order_id IS NULL;
+
++------------+---------+
+| customer_id | name    |
++------------+---------+
+| 3          | Charlie |
++------------+---------+
+
+8. Retrieve details of orders where the total amount is greater than the average order total.(solve using subquery)
+SELECT order_id, customer_id, total_amount
+FROM Orders_012
+WHERE total_amount > (SELECT AVG(total_amount) FROM Orders_012);
+
++---------+------------+--------------+
+| order_id | customer_id | total_amount |
++---------+------------+--------------+
+| 102     | 2          | 400.00       |
++---------+------------+--------------+
+
+9. Find customers who have placed at least two orders.
+SELECT c.customer_id, c.name
+FROM Customers_012 c
+JOIN Orders_012 o ON c.customer_id = o.customer_id
+GROUP BY c.customer_id
+HAVING COUNT(o.order_id) >= 2;
+
+Empty set
+
+10. Find the top 3 most ordered products based on quantity sold.
+SELECT p.product_name, SUM(oi.quantity) AS total_quantity
+FROM Order_Items_012 oi
+JOIN Products_012 p ON oi.product_id = p.product_id
+GROUP BY p.product_id
+ORDER BY total_quantity DESC
+LIMIT 3;
+
++--------------+---------------+
+| product_name | total_quantity |
++--------------+---------------+
+| Phone        | 2             |
+| Laptop       | 1             |
+| Chair        | 1             |
++--------------+---------------+
+
+11. Display the product names that are sold by multiple sellers.
+SELECT p.product_name
+FROM Product_Sellers_012 ps
+JOIN Products_012 p ON ps.product_id = p.product_id
+GROUP BY ps.product_id
+HAVING COUNT(DISTINCT ps.seller_id) > 1;
+
+Empty set
+
+12. Retrieve sellers who have never sold any product.
+SELECT s.seller_id, s.seller_name
+FROM Sellers_012 s
+LEFT JOIN Product_Sellers_012 ps ON s.seller_id = ps.seller_id
+WHERE ps.product_id IS NULL;
+
+Empty set
+
+13. Find all products that have never been ordered.
+SELECT p.product_id, p.product_name
+FROM Products_012 p
+LEFT JOIN Order_Items_012 oi ON p.product_id = oi.product_id
+WHERE oi.order_id IS NULL;
+
+Empty set
+
+14. Retrieve the names of customers who have placed the highest number of orders.
+SELECT c.name, COUNT(o.order_id) AS total_orders
+FROM Customers_012 c
+JOIN Orders_012 o ON c.customer_id = o.customer_id
+GROUP BY c.customer_id
+ORDER BY total_orders DESC
+LIMIT 1;
+
++------+--------------+
+| name | total_orders |
++------+--------------+
+| Alice| 1           |
++------+--------------+
+
+
+15. Find all customers who have ordered more than 5 different products.
+(Hint: Use COUNT DISTINCT on product_id.)
+SELECT o.customer_id, c.name
+FROM Orders_012 o
+JOIN Order_Items_012 oi ON o.order_id = oi.order_id
+JOIN Customers_012 c ON o.customer_id = c.customer_id
+GROUP BY o.customer_id
+HAVING COUNT(DISTINCT oi.product_id) > 5;
+
+Empty Set
+
+16. Find products that are sold by at least two different sellers but have never been ordered.(Hint: Use HAVING COUNT(DISTINCT seller_id) > 1 and NOT EXISTS.)
+
+SELECT p.product_id, p.product_name
+FROM Products_012 p
+JOIN Product_Sellers_012 ps ON p.product_id = ps.product_id
+GROUP BY p.product_id
+HAVING COUNT(DISTINCT ps.seller_id) > 1
+AND NOT EXISTS (
+    SELECT 1 FROM Order_Items_012 oi WHERE oi.product_id = p.product_id
+);
+
+Empty Set
+
+17. Find the customer who has spent the most money overall.
+(Hint: Use SUM and ORDER BY.)
+SELECT c.name, SUM(o.total_amount) AS total_spent
+FROM Customers_012 c
+JOIN Orders_012 o ON c.customer_id = o.customer_id
+GROUP BY c.customer_id
+ORDER BY total_spent DESC
+LIMIT 1;
+
++------+-------------+
+| name | total_spent |
++------+-------------+
+| Bob  | 400.00      |
++------+-------------+
+
+
+18. Find all customers who have either placed an order or live in the same city as a seller.
+(Hint: Use UNION to combine customers who placed orders and those in seller cities.)
+SELECT customer_id, name FROM Customers_012
+WHERE customer_id IN (SELECT DISTINCT customer_id FROM Orders_012)
+UNION
+SELECT customer_id, name FROM Customers_012
+WHERE city IN (SELECT DISTINCT city FROM Sellers_012);
+
++------------+---------+
+| customer_id | name    |
++------------+---------+
+| 1          | Alice   |
+| 2          | Bob     |
+| 3          | Charlie |
++------------+---------+
+
+19. Retrieve all products that are either in stock with at least one seller or have been ordered at least once.
+(Hint: Use UNION between Product_Sellers and Order_Items.)
+SELECT DISTINCT p.product_id, p.product_name
+FROM Products_012 p
+JOIN Product_Sellers_012 ps ON p.product_id = ps.product_id
+UNION
+SELECT DISTINCT p.product_id, p.product_name
+FROM Products_012 p
+JOIN Order_Items_012 oi ON p.product_id = oi.product_id;
+
++------------+--------------+
+| product_id | product_name |
++------------+--------------+
+| 201        | Laptop       |
+| 202        | Phone        |
+| 203        | Chair        |
++------------+--------------+
+
+20. Retrieve products that have been both ordered and are currently in stock.(Hint: Use INTERSECT between Order_Items and Product_Sellers.)
+SELECT p.product_id, p.product_name
+FROM Products_012 p
+JOIN Order_Items_012 oi ON p.product_id = oi.product_id
+INTERSECT
+SELECT p.product_id, p.product_name
+FROM Products_012 p
+JOIN Product_Sellers_012 ps ON p.product_id = ps.product_id;
+
++------------+--------------+
+| product_id | product_name |
++------------+--------------+
+| 201        | Laptop       |
+| 202        | Phone        |
+| 203        | Chair        |
++------------+--------------+
+
+21. Find customers who have both placed an order and live in a city where a seller is located.
+(Hint: Use INTERSECT between customers who have placed orders and customers who live in a seller s city.)
+SELECT customer_id, name
+FROM Customers_012
+WHERE customer_id IN (SELECT DISTINCT customer_id FROM Orders_012)
+INTERSECT
+SELECT customer_id, name
+FROM Customers_012
+WHERE city IN (SELECT DISTINCT city FROM Sellers_012);
+
++------------+---------+
+| customer_id | name    |
++------------+---------+
+| 1          | Alice   |
+| 2          | Bob     |
++------------+---------+
+
+22. Retrieve all customers who have placed at least one order in each year available in the database.
+(Hint: Use INTERSECT with orders grouped by year.)
+SELECT customer_id, name
+FROM Customers_012
+WHERE customer_id IN (
+    SELECT customer_id FROM Orders_012 GROUP BY customer_id HAVING COUNT(DISTINCT YEAR(order_date)) = 
+    (SELECT COUNT(DISTINCT YEAR(order_date)) FROM Orders_012)
+);
+
+Empty Set
+
+
+

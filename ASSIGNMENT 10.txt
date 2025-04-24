@@ -1,0 +1,136 @@
+  ASSIGNMENT 10
+
+Collection zipcode - [
+{ _id: '10280', city: 'NEW YORK', state: 'NY', pop: 5574 },
+{ _id: '10281', city: 'NEW YORK', state: 'NY', pop: 12000000 },
+{ _id: '90001', city: 'LOS ANGELES', state: 'CA', pop: 15000000 },
+{ _id: '60601', city: 'CHICAGO', state: 'IL', pop: 8000000 },
+{ _id: '75201', city: 'DALLAS', state: 'TX', pop: 7000000 }
+]
+
+Collection employees -
+
+[
+{ _id: 1, name: 'Alice', department: 'HR', salary: 50000 },
+{ _id: 2, name: 'Bob', department: 'IT', salary: 70000 },
+{ _id: 3, name: 'Charlie', department: 'Finance', salary: 80000 },
+{ _id: 4, name: 'David', department: 'IT', salary: 75000 },
+{ _id: 5, name: 'Eve', department: 'HR', salary: 52000 },
+{ _id: 6, name: 'Frank', department: 'IT', salary: 72000 },
+{ _id: 7, name: 'Grace', department: 'Computer', salary: 90000 },
+{ _id: 8, name: 'Hank', department: 'Computer', salary: 95000 }
+]
+
+Collection Orders -
+
+[
+{
+_id: ObjectId('67e95a8fe8478f1435cb0cf7'), cust_id: 'abc123',
+status: 'A', price: 25
+},
+{
+_id: ObjectId('67e95a8fe8478f1435cb0cf8'), cust_id: 'xyz456',
+status: 'B', price: 40
+},
+{
+_id: ObjectId('67e95a8fe8478f1435cb0cf9'),
+cust_id: 'abc123', status: 'A',
+price: 30
+},
+{
+_id: ObjectId('67e95a8fe8478f1435cb0cfa'), cust_id: 'xyz456',
+status: 'A', price: 20
+},
+{
+_id: ObjectId('67e95a8fe8478f1435cb0cfb'), cust_id: 'pqr789',
+status: 'A', price: 50
+}
+]
+
+
+
+1. Display the salary of employees department wise
+
+var mapFunctionSalary = function() { emit(this.department, this.salary);
+};
+
+var reduceFunctionSalary = function(key, values) { return Array.sum(values);
+};
+
+db.employees.mapReduce( mapFunctionSalary, reduceFunctionSalary,
+{ out: "salary_departmentwise" }
+)
+
+db.salary_departmentwise.find().pretty()
+
+[
+{ _id: 'HR', value: 102000 },
+{ _id: 'Finance', value: 80000 },
+{ _id: 'Computer', value: 185000 },
+{ _id: 'IT', value: 217000 }
+]
+2. Display the count of employees department wise
+
+var mapFunctionCount = function() { emit(this.department, 1);
+};
+
+var reduceFunctionCount = function(key, values) { return Array.sum(values);
+};
+
+db.employees.mapReduce( mapFunctionCount, reduceFunctionCount,
+{ out: "employee_count_departmentwise" }
+)
+
+db.employee_count_departmentwise.find().pretty()
+
+[
+{ _id: 'Computer', value: 2 },
+{ _id: 'IT', value: 3 },
+{ _id: 'HR', value: 2 },
+{ _id: 'Finance', value: 1 }
+]
+
+
+3. Consider the collection  Orders   with the following types of doccuments
+{
+_id: ObjectId("50a8240b927d5d8b5891743c"), cust_id: "abc123",
+status: 'A', price: 25,
+}
+Return the Total Price Per Customer
+
+db.orders.aggregate([
+{
+$group: {
+_id: "$cust_id",
+totalPrice: { $sum: "$price" }
+}
+}
+]);
+[
+{ _id: 'xyz456', totalPrice: 60 },
+{ _id: 'abc123', totalPrice: 55 },
+{ _id: 'pqr789', totalPrice: 50 }
+]
+
+4. Display the total salatry of employees working in computer department.
+
+db.employees.aggregate([
+{ $match: { department: "Computer" } },
+{ $group: { _id: null, total_salary: { $sum: "$salary" } } }
+])
+
+[ { _id: null, total_salary: 185000 } ]
+
+
+
+5. Return States with Populations above 10 Million
+db.zipcode.aggregate([{ $group: { _id: "$state", totalPop: { $sum: "$pop" } } }, { $match: { totalPop: { $gt: 10000000 } } }]).forEach(printjson);
+
+{
+_id: 'CA',
+totalPop: 15000000
+}
+{
+_id: 'NY',
+totalPop: 12005574
+}

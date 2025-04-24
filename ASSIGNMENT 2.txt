@@ -1,0 +1,148 @@
+Table:
++-----+-----------+----------+------------+------+---------------------------+-----+------------------+
+| PRN | FirstName | LastName | MiddleName | Year | Email                     | Age | Department       |
++-----+-----------+----------+------------+------+---------------------------+-----+------------------+
+| 101 | John      | Doe      | A          |    2 | john.doe@example.com      |  20 | Computer Science |
+| 102 | Jane      | Smith    | B          |    1 | jane.smith@example.com    |  19 | Electronics      |
+| 103 | Alice     | Johnson  | NULL       |    3 | alice.johnson@example.com |  21 | Mechanical       |
+| 104 | brod      | stud     | b          |    2 | Brod.a@example.com        |  20 | Electronics      |
++-----+-----------+----------+------------+------+---------------------------+-----+------------------+
+
+
+1] Write a query to retrieve all records from the Students table.
+SELECT * FROM Students_012;
+
++-----+-----------+-----------+------------+------|-----------------------+-----+---------------------+
+| PRN | FirstName | LastName  | MiddleName | Year | Email                 | Age | Department           |
++-----+-----------+-----------+------------+------|-----------------------+-----|---------------------+
+| 101 | John      | Doe       | A          | 2    | john.doe@example.com   | 20  | Computer Science     |
+| 102 | Jane      | Smith     | B          | 1    | jane.smith@example.com | 19  | Electronics          |
+| 103 | Alice     | Johnson   | NULL       | 3    | alice.johnson@example.com | 21  | Mechanical           |
+| 104 | brod      | stud      | b          | 2    | brod.a@example.com    | 20  | Electronics          |
++-----+-----------+-----------+------------+------|-----------------------+-----|---------------------+
+
+2] Write a query to update the Year of the student with PRN 102 to 2
+UPDATE Students_012 SET Year = 2 WHERE PRN = 102;
+
+3] Write a query to delete the record of the student whose PRN is 103.
+delete from Students_012 WHERE PRN = 103;
+
+4] Write a query to add a new column PhoneNumber of type VARCHAR(15) to          the Students table.
+ALTER TABLE Students_012
+ADD PhoneNumber VARCHAR(15);
+
+5] Write a query to drop a new column PhoneNumber of type VARCHAR(15) to the Students table.
+ALTER TABLE Students_012
+DROP PhoneNumber;
+
+
+6] Write a query to retrieve all distinct departments from the Students table.
+SELECT DISTINCT Department FROM Students_012;
++---------------------+
+| Department          |
++---------------------+
+| Computer Science    |
+| Electronics         |
+| Mechanical          |
++---------------------+
+
+7] Write a query to find number of distinct departments from the Students table.
+SELECT COUNT(DISTINCT Department) FROM Students_012;
+
++----------------------+
+| Department           |
++----------------------+
+| 3                    |
++----------------------+
+
+8] Write a query to retrieve the distinct years in which students are enrolled.
+SELECT DISTINCT Year FROM Students_012;
++------+
+| Year |
++------+
+| 1    |
+| 2    |
+| 3    |
++------+
+
+9] Write a query to retrieve all distinct ages of students in the "Computer Science" department.
+SELECT DISTINCT Age FROM Students_012 WHERE Department = 'Computer Science';
++-----+
+| Age |
++-----+
+| 20  |
++-----+
+
+
+
+
+
+10] Write a query to retrieve distinct first names of students whose age is less than 21.
+SELECT DISTINCT FirstName FROM Students_012 WHERE Age < 21;
+
++-----------+
+| FirstName |
++-----------+
+| John      |
+| Jane      |
+| brod      |
++-----------+
+
+11] Write a query to retrieve the full details of students who are older than 20 years.
+SELECT * FROM Students_012 WHERE Age > 20;
++-----+-----------+-----------+------------+------|-----------------------+-----|---------------------+
+| PRN | FirstName | LastName  | MiddleName | Year | Email                 | Age | Department           |
++-----+-----------+-----------+------------+------|-----------------------+-----|---------------------+
+| 103 | Alice     | Johnson   | NULL       | 3    | alice.johnson@example.com | 21  | Mechanical           |
++-----+-----------+-----------+------------+------|-----------------------+-----|---------------------+
+
+
+12] Write a query to retrieve all students enrolled in their third year.
+SELECT * FROM Students_012 WHERE Year = 3;
++-----+-----------+-----------+------------+------|-----------------------+-----|---------------------+
+| PRN | FirstName | LastName  | MiddleName | Year | Email                 | Age | Department           |
++-----+-----------+-----------+------------+------|-----------------------+-----|---------------------+
+| 103 | Alice     | Johnson   | NULL       | 3    | alice.johnson@example.com | 21  | Mechanical           |
++-----+-----------+-----------+------------+------|-----------------------+-----|---------------------+
+
+
+13] Write a query to display the first and last names of students along with their department, but only for students whose PRN is greater than 101.
+SELECT FirstName, LastName, Department FROM Students_012 WHERE PRN > 101;
++-----------+----------+---------------------+
+| FirstName | LastName | Department          |
++-----------+----------+---------------------+
+| Jane      | Smith    | Electronics         |
+| Alice     | Johnson  | Mechanical          |
+| brod      | stud     | Electronics         |
++-----------+----------+---------------------+
+
+
+
+
+14] Write a query to fetch the first names and email addresses of all students in the "Electronics" department.
+SELECT FirstName, Email FROM Students_012 WHERE Department ='Electronics';
++-----------+-----------------------+
+| FirstName | Email                 |
++-----------+-----------------------+
+| Jane      | jane.smith@example.com |
+| brod      | brod.a@example.com    |
++-----------+-----------------------+
+
+15] Write a query to fetch details of students in the "Computer Science" department who are older than 19
+SELECT * FROM Students_012 WHERE Age > 19;
+
++-----+-----------+-----------+------------+------|-----------------------+-----|---------------------+
+| PRN | FirstName | LastName  | MiddleName | Year | Email                 | Age | Department           |
++-----+-----------+-----------+------------+------|-----------------------+-----|---------------------+
+| 101 | John      | Doe       | A          | 2    | john.doe@example.com   | 20  | Computer Science     |
++-----+-----------+-----------+------------+------|-----------------------+-----|---------------------+
+
+16] Write a query to remove all records from the Students table without deleting the structure of the table.
+TRUNCATE TABLE Students_012;
+
+17] Write a query to delete the Students table from the database
+DROP TABLE PCCOE_012.Students_012;
+
+18] Drop the Students table.
+DROP TABLE Students_012;
+             

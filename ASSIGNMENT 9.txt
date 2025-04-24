@@ -1,0 +1,175 @@
+  ASSIGNMENT 9
+
+Collection Employees - [
+{
+_id: ObjectId('67e90f56e8478f1435cb0ce8'), name: 'John Doe',
+department: 'IT', salary: 60000,
+email: 'john@example.com'
+},
+{
+_id: ObjectId('67e90f56e8478f1435cb0ce9'), name: 'Jane Smith',
+department: 'HR', salary: 55000,
+email: 'jane@example.com'
+},
+{
+_id: ObjectId('67e90f56e8478f1435cb0cea'), name: 'Mike Johnson',
+department: 'IT', salary: 65000,
+email: 'mike@example.com'
+},
+{
+_id: ObjectId('67e90f56e8478f1435cb0ceb'), name: 'Sarah Williams',
+department: 'Finance', salary: 70000,
+email: 'sarah@example.com'
+},
+{
+_id: ObjectId('67e90f56e8478f1435cb0cec'), name: 'David Brown',
+department: 'HR', salary: 50000,
+email: 'david@example.com'
+},
+{
+_id: ObjectId('67e90f56e8478f1435cb0ced'),
+name: 'Emily Davis', department: 'Finance', salary: 72000,
+email: 'emily@example.com'
+}
+]
+
+Collection zipcode - [
+{ _id: '10280', city: 'NEW YORK', state: 'NY', pop: 5574 },
+{ _id: '10281', city: 'NEW YORK', state: 'NY', pop: 12000000 },
+{ _id: '90001', city: 'LOS ANGELES', state: 'CA', pop: 15000000 },
+{ _id: '60601', city: 'CHICAGO', state: 'IL', pop: 8000000 },
+{ _id: '75201', city: 'DALLAS', state: 'TX', pop: 7000000 }
+]
+
+Collection students - [
+{
+_id: ObjectId('67e91241e8478f1435cb0cf4'), roll_no: 101,
+name: 'Ishan Patil', department: 'Computer', year: 2023,
+email: 'rahul@example.com'
+},
+{
+_id: ObjectId('67e91241e8478f1435cb0cf5'), roll_no: 102,
+name: 'Priya Sharma', department: 'IT',
+year: 2022,
+email: 'priya@example.com'
+},
+{
+_id: ObjectId('67e91241e8478f1435cb0cf6'), roll_no: 103,
+name: 'Amit Singh', department: 'Mechanical', year: 2023,
+email: 'amit@example.com'
+}
+]
+1. Return States with Populations above 10 Million
+db.zipcode.aggregate([{ $group: { _id: "$state", totalPop: { $sum: "$pop" } } }, { $match: { totalPop: { $gt: 10000000 } } }]).forEach(printjson);
+
+{
+_id: 'CA',
+totalPop: 15000000
+}
+{
+_id: 'NY',
+totalPop: 12005574
+}
+
+2. Display the department wise average salary
+db.employees.aggregate([{ $group: { _id: "$department", avgSalary: { $avg: "$salary" } }
+}]).forEach(printjson);
+
+{
+_id: 'HR', avgSalary: 52500
+}
+{
+_id: 'Finance', avgSalary: 71000
+}
+{
+_id: 'IT', avgSalary: 62500
+}
+
+3. display the no. Of employees working in each department
+db.employees.aggregate([{ $group: { _id: "$department", count: { $sum: 1 } }
+}]).forEach(printjson);
+
+{
+_id: 'HR', count: 2
+}
+{
+_id: 'Finance', count: 2
+}
+{
+_id: 'IT', count: 2
+}
+
+4. Display the department wise total salary of departments having total salary greater than or equals to 50000/-
+
+db.employees.aggregate([{ $group: { _id: "$department", totalSalary: { $sum: "$salary" } } }, {
+$match: { totalSalary: { $gte: 50000 } } }]).forEach(printjson);
+
+{
+_id: 'HR', totalSalary: 105000
+}
+{
+_id: 'IT', totalSalary: 125000
+}
+{
+_id: 'Finance', totalSalary: 142000
+}
+
+
+5. Write the queries using the different operators like max, min. Etc.
+
+db.employees.aggregate([{ $group: { _id: null, maxSalary: { $max: "$salary" } }
+}]).forEach(printjson)
+{
+_id: null, maxSalary: 72000
+}
+
+db.employees.aggregate([{ $group: { _id: null, minSalary: { $min: "$salary" } }
+}]).forEach(printjson);
+
+{
+_id: null, minSalary: 50000
+}
+
+6. Create the simple index on roll_no field
+db.students.createIndex({ "roll_no": 1 });
+
+7. create unique index on any field for above given collections
+db.employees.createIndex({ "email": 1 }, { unique: true });
+
+8. create compound index on any fields for above given collections
+db.employees.createIndex({ "department": 1, "salary": -1 });
+
+9. Show all the indexes created in the database PCCOE
+
+db.getCollectionNames().forEach(function(collection) { print("Indexes for " + collection + ":"); printjson(db[collection].getIndexes()); });
+
+Indexes for employees: [
+{
+v: 2,
+key: {
+_id: 1
+},
+name: '_id_'
+}
+]
+Indexes for students: [
+{
+v: 2,
+key: {
+_id: 1
+},
+name: '_id_'
+}
+]
+Indexes for zipcode: [
+{
+v: 2,
+key: {
+_id: 1
+},
+name: '_id_'
+}
+]
+10. Show all the indexes created in above collections.
+db.getCollectionNames().forEach(function(collection) { print("Indexes for " + collection + ":"); printjson(db[collection].getIndexes());
+});
